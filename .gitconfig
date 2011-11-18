@@ -1,0 +1,24 @@
+[user]
+    name = Steve Phillips
+    email = elimisteve@gmail.com
+[color]
+    ui = auto
+[color "diff"]
+    whitespace = red reverse
+[core]
+    excludesfile = /home/steve/.gitignore
+	editor = emacsclient -t
+[alias]
+    br   = branch
+    co   = checkout
+    d    = diff
+    dif  = diff
+    l    = log
+    st   = status
+    pom  = push origin master
+    puom = pull origin master
+    cam  = commit -am
+    cm   = commit -m
+    om   = origin master
+[dude]
+	interval = 300
