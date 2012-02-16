@@ -38,13 +38,15 @@
 	  '(lambda ()
 	 (local-set-key [(control %)] 'rails-insert-code)
 ;	 (local-set-key [(control {)] 'rails-insert-var)
-	 (local-set-key [(control \+)] 'rails-insert-println)
+	 ;; (local-set-key [(control \+)] 'rails-insert-println)
 ;	 (local-set-key [(control \_)] 'rails-insert-print)
 	 (local-set-key "\"" 'skeleton-pair-insert-maybe)
 	 (local-set-key "'" 'skeleton-pair-insert-maybe)
 	 (local-set-key "{" 'skeleton-pair-insert-maybe)
 	 (local-set-key "\C-c\C-c" 'comment-region)
 	 (local-set-key "\C-c\C-u" 'uncomment-region)
+	 (local-set-key [(meta shift c)] 'new-rb-file-signed)
+	 (local-set-key [f10] 'rb-compile)
 	 ))
 
 (setq sh-mode-hook
@@ -60,12 +62,12 @@
 	 (local-set-key "<" 'skeleton-pair-insert-maybe)
 	 (local-set-key "\"" 'skeleton-pair-insert-maybe)
 	 (local-set-key "'" 'skeleton-pair-insert-maybe)
-	 (local-set-key [(control %)] 'rails-insert-code)
-	 (local-set-key [(control \=)] 'rails-insert-println)
-	 (local-set-key [(control \_)] 'rails-insert-print)
-	 ;; (local-set-key [(control %)] 'dj-insert-ttag)
-	 ;; (local-set-key [(control {)] 'dj-insert-var)
-	 ;; (local-set-key [(control \#)] 'dj-insert-comment)
+	 ;; (local-set-key [(control %)] 'rails-insert-code)
+	 ;; (local-set-key [(control \=)] 'rails-insert-println)
+	 ;; (local-set-key [(control \_)] 'rails-insert-print)
+	 (local-set-key [(control %)] 'dj-insert-ttag)
+	 (local-set-key [(control {)] 'dj-insert-var)
+	 (local-set-key [(control \#)] 'dj-insert-comment)
 	 (local-set-key "\C-c\C-c" 'comment-region)
 	 (local-set-key "\C-c\C-u" 'uncomment-region)
      (longlines-mode 0) ; turn it off
@@ -83,7 +85,7 @@
 (setq go-mode-hook
       '(lambda ()
      (setq tab-width 4
-     indent-tabs-mode nil
+     indent-tabs-mode t
      c-basic-offset 4)
 
 	 ;(local-set-key [(control shift j)] 'my-newline-indent)
@@ -94,7 +96,8 @@
 	 (local-set-key [(meta shift c)] 'new-go-file)
 	 (local-set-key [f10] 'go-compile)
 	 (local-set-key [f11] 'my-scroll-4)
-     (local-set-key [(control \#)] 'go-ae-insert-comment)
+     (local-set-key [(control \#)] 'go-html-comment)
+     (local-set-key [(control \{)] 'go-html-var)
 	 ))
 
 (setq clojure-mode-hook
@@ -124,6 +127,14 @@
           (lambda ()
 			(local-set-key [(control shift j)] 'my-paren-newline-indent)
 			))
+
+(add-hook 'haml-mode-hook
+          '(lambda ()
+             (setq indent-tabs-mode nil)
+             (define-key haml-mode-map "\C-m" 'newline-and-indent)))
+
+(add-to-list 'load-path "~/.emacs.d/plugins/haml-mode")
+(require 'haml-mode)
 
 
 ;;; See below
@@ -217,6 +228,13 @@
 ;; ;;(require 'tabbar)
 ;; ;;(tabbar-mode 1)
 
+(add-to-list 'load-path "~/.emacs.d/plugins/markdown")
+(autoload 'markdown-mode "markdown-mode.el"
+   "Major mode for editing Markdown files" t)
+(setq auto-mode-alist
+   (cons '("\\.md" . markdown-mode) auto-mode-alist))
+
+
 ;; Rinari
 (add-to-list 'load-path "~/.emacs.d/plugins/rinari")
 (require 'rinari) ;Taken out on 2011.04.23
@@ -248,6 +266,7 @@
 (add-to-list 'load-path "~/.emacs.d/plugins/javascript")
 (require 'javascript-mode)
 (add-to-list 'auto-mode-alist '("\\.js$" . javascript-mode))
+(add-to-list 'auto-mode-alist '("\\.json$" . javascript-mode)) ; 2011.08.31
 
 ;;;; yasnippits
 (add-to-list 'load-path
@@ -264,7 +283,6 @@
 (add-to-list 'load-path "~/.emacs.d/elpa/clojure-mode-1.7.1/")
     (require 'clojure-mode)
 ;    (add-to-list 'clojure-mode)  ;; ??
-
 
 ;;;; SLIME
 (add-to-list 'load-path "~/.emacs.d/elpa/slime-20100404")
@@ -513,10 +531,12 @@
  (move-end-of-line nil)
  (newline 4)
  (end-of-buffer)
- (shell-command "echo -ne \"* Plan\n\"" 1)
- (end-of-buffer)
+ (shell-command "echo -ne \"* Plan\"" 1)
+ (beginning-of-buffer)
+ (next-line 1))
+; (end-of-buffer)
 ; (longlines-mode)
- (previous-line 4))
+; (previous-line 4)
 ; (save-buffer)
 
 
@@ -530,7 +550,10 @@
   (newline 2)
   (open-line 1)
   (insert-time)
-  (recenter-top-bottom 2))
+  (next-line 2)
+  (recenter-top-bottom 2)
+  (previous-line 2)
+  (move-end-of-line 1))
   ;; (forward-word)
   ;; (org-cycle)
   ;; (previous-line)
@@ -695,6 +718,21 @@
   (newline 2)
   (next-line 2))
 
+(defun new-rb-file-signed ()
+  (interactive)
+  (shell-command "echo -n '#!/usr/bin/env ruby\n# Steve Phillips / elimisteve\n# '" 1)
+  (next-line 2)
+  (move-beginning-of-line nil)
+  (forward-char 2)
+  (insert-date)
+  (newline 2)
+  (next-line 2))
+
+(defun rb-compile ()
+  "Use compile to run ruby programs"
+  (interactive)
+  (compile (concat "[[ -s \"/home/steve/.rvm/scripts/rvm\" ]] && . \"/home/steve/.rvm/scripts/rvm\" && /home/steve/.rvm/rubies/ruby-1.9.2-p180/bin/ruby " (buffer-name))))
+
 (defun new-clj-file-signed ()
   (interactive)
   (shell-command "echo -n '; Steve Phillips / elimisteve\n; '" 1)
@@ -730,7 +768,7 @@
   (shell-command "echo -n '// Steve Phillips / elimisteve\n// ' " 1)
   (end-of-buffer)
   (insert-date)
-  (shell-command "echo -ne '\n\npackage main\n\nimport (\n    \"fmt\"\n)\n\nfunc main() {\n\n}' " 1)
+  (shell-command "echo -ne '\n\npackage main\n\nimport (\n	\"fmt\"\n)\n\nfunc main() {\n\n}' " 1)
   (end-of-buffer)
   (previous-line)
   (indent-for-tab-command)
@@ -750,8 +788,10 @@
 
 (defun my-paren-newline-indent ()
   (interactive)
-  (shell-command "echo -n '{}'" 1)
-  (forward-char 1)
+  ;; (shell-command "echo -n '{}'" 1)
+  ;; (forward-char 1)
+  (shell-command "echo -n ' {}'" 1)
+  (forward-char 2)
   (newline-and-indent)
   (newline-and-indent)
   (previous-line)
@@ -765,17 +805,23 @@
 (defun go-compile ()
   (interactive)
   ;(compile (concat "~/bin/gc.sh " (buffer-name)))
-  (compile (concat "~/bin/gofull.sh " (buffer-name) " " (buffer-file-name)))
+  (compile (concat "~/bin/go1full.sh " (buffer-name) " " (buffer-file-name)))
   ;(compile (concat "~/bin/pygo " (buffer-name))) ; 2011.03.26, and gofull
   ;; (my-scroll-4)
   )
   ; 2010.12.17
 
-(defun go-ae-insert-comment ()
-  "Begin {# } Go App Engine comment"
+(defun go-html-var ()
+  "Begin {{}} Go template ~statement"
   (interactive)
-  (shell-command "echo -n '{#  }'" 1)
-  (forward-char 3))
+  (shell-command "echo -n '{{}}'" 1)
+  (forward-char 2))
+
+(defun go-html-comment ()
+  "Begin {/*  */} Go template comment"
+  (interactive)
+  (shell-command "echo -n '{{/*  */}}'" 1)
+  (forward-char 5))
 
 (defun c-compile ()
   (interactive)
@@ -801,6 +847,8 @@
 (defalias 'rd 'redraw-display)     ; 2011.03.17
 (defalias 'wc 'whitespace-cleanup) ; 2011.03.26
 (defalias 'rf 'rename-file)        ; 2011.05.29
+(defalias 'df 'delete-file)        ; 2011.06.23
+(defalias 'om 'org-mode)           ; 2011.08.01
 
 ;;(defun tabbar-buffer-groups ()
 ;; "Return the list of group names the current buffer belongs to.
@@ -902,7 +950,8 @@
      (fringe ((t (:background "#1a1a1a"))))
      (mode-line ((t (:foreground "#eeeeec" :background "#555753"))))
      ;(region ((t (:background "#f3963f"))))
-	 (region ((t (:background "#ff5500"))))
+	 ;(region ((t (:background "#ff5500"))))
+     (region ((t (:background "#888888"))))
      (font-lock-builtin-face ((t (:foreground "#d9f22c"))))
      (font-lock-comment-face ((t (:foreground "#ad0009"))))
      (font-lock-function-name-face ((t (:foreground "#006fed"))))
