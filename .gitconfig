@@ -17,6 +17,7 @@
     st   = status
     pom  = push origin master
     puom = pull origin master
+    pp   = !git pull origin master && git push origin master
     cam  = commit -am
     cm   = commit -m
     om   = origin master
